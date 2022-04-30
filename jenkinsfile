@@ -57,12 +57,19 @@ pipeline {
             }
         }
 
+        stage("add Repo") {
+                    steps {
+                           sh "helm repo add buildachart ${repo}"
+                        }
+                   }
+
         stage('Deploy to minikube') {
             steps {
                 echo 'Deploying to minikube'
                 withCredentials([file(credentialsId:'kube-config', variable:'KUBECONFIG')]){
                 script{
-                    sh "helm install my-cherry-chart buildachart/ --values buildachart/values.yaml --namespace ${BRANCH-NAME} --atomic --force"}
+                    sh "kubectl create namespace ${BRANCH-NAME}"
+                    sh "helm  upgrade --install my-cherry-chart buildachart/ --values buildachart/values.yaml --namespace ${BRANCH-NAME} --atomic --force"}
                 }
 
             }
