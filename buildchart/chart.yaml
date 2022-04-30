@@ -1,0 +1,4 @@
+apiVersion: v1 
+description: helm chart for badreads application 
+name: badreads-app
+version: 1.1 

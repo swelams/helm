@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  selector:
+    matchLabels:
+      component: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: backend
+    spec:
+      volumes:
+      - name: images
+        persistentVolumeClaim:
+          claimName: images-presistent-volume-claim
+      containers:
+      - name: backend
+        image: kareemelkasaby/badreads-backend:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4000
+        volumeMounts:
+        - name: images
+          mountPath: /app/public/authors
+        - name: images
+          mountPath: /app/public/books
+        - name: images
+          mountPath: /app/public/users
+        env:
+        - name: MONGOHOST
+          value: mongo-clusterip  
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.server.name }}
+spec:
+  selector:
+    matchLabels:
+      component: {{ .Values.server.component }}
+  replicas: {{ .Values.server.replicas }}
+  template:
+    metadata:
+      labels:
+        component: {{ .Values.server.component }}
+    spec:
+      volumes:
+      - name: {{ .Values.server.volumesName }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.server.claimName }}
+      containers:
+      - name: {{ .Values.server.containerName }}
+        image: {{ .Values.server.image }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ .Values.server.containerport }}
+        volumeMounts:
+        - name: {{ .Values.server.volumeMountName1 }}
+          mountPath: {{ .Values.server.mountpath1 }}
+        - name: {{ .Values.server.volumeMountName2 }}
+          mountPath: {{ .Values.server.mountpath2 }}
+        - name: {{ .Values.server.volumeMountName3 }}
+          mountPath: {{ .Values.server.mountpath3 }}
+        env:
+        - name: MONGOHOST
+          value: mongo-clusterip  

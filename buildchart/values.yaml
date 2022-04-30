@@ -1,0 +1,27 @@
+client:
+  deploymentName: frontend-deployment
+  component: frontend
+  replicas: 1
+  containerName: frontend
+  image: mohamedswelam/client:11
+  containerPort: 3000 
+  envName: REACT_APP_PRODUCTION_IP
+  envValue: backend-clusterip
+
+
+frontend-service:
+  name: frontend-clusterip
+  servicetype: NodePort
+  component: frontend
+  service.port: 3000
+  targetport: 3000
+  nodeport: 30008 
+
+
+server:
+  name: backend-deployment 
+  component: backend
+  replicas: 1 
+  volumesName: images
+  claimName: images-presistent-volume-claim
+
