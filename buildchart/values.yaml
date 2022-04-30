@@ -3,7 +3,7 @@ client:
   component: frontend
   replicas: 1
   containerName: frontend
-  image: mohamedswelam/client:11
+  front-image: mohamedswelam/client:11
   containerPort: 3000 
   envName: REACT_APP_PRODUCTION_IP
   envValue: backend-clusterip
@@ -24,4 +24,38 @@ server:
   replicas: 1 
   volumesName: images
   claimName: images-presistent-volume-claim
+  containerName: backend
+  back-image: kareemelkasaby/badreads-backend:v1
+  containerport: 4000
+  volumeMountName: image
+  mountpath1: /app/public/authors
+  mountpath2: /app/public/books
+  mountpath3: /app/public/users
 
+
+backend-service:
+  name: backend-clusterip
+  type: LoadBalancer
+  component: backend
+  port: 4000
+  targetport: 4000
+
+
+mongo: 
+  name: mongo-deployment
+  component: mongo
+  volumename: mongo-database
+  containername: mongo 
+  containerimage: mongo:4.2.8
+  mountname: mongo-database
+  mountpath: /data/db
+  envname1: MONGO_INITDB_DATABASE
+  envvalue1: admin
+  envname2: MONGO_INITDB_ROOT_USERNAME
+  envvalue2: admin
+  envname3: MONGO_INITDB_ROOT_PASSWORD
+
+mongo-service:
+  name: mongo 
+  type: ClusterIP
+  component: mongo 

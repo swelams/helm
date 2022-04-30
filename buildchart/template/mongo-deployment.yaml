@@ -1,34 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongo-deployment
+  name: {{ .Values.mongo.name }}
 spec:
   selector:
     matchLabels:
-      component: mongo
+      component: {{ .Values.mongo.component }}
   template:
     metadata:
       labels:
-        component: mongo
+        component: {{ .Values.mongo.component }}
     spec:
       volumes:
-      - name: mongo-database
+      - name: {{ .Values.mongo.volumename }}
         persistentVolumeClaim:
           claimName: mongo-presistent-volume-claim
       containers:
-      - name: mongo
-        image: mongo:4.2.8
+      - name: {{ .Values.mongo.containername }}
+        image: {{ .Values.mongo.containerimage }}
         ports:
         - containerPort: 27017
         volumeMounts:
-        - name: mongo-database
-          mountPath: /data/db
+        - name: {{ .Values.mongo.mountname }}
+          mountPath: {{ .Values.mongo.mountpath }}
         env:
-        - name: MONGO_INITDB_DATABASE
-          value: admin
-        - name: MONGO_INITDB_ROOT_USERNAME
-          value: admin
-        - name: MONGO_INITDB_ROOT_PASSWORD
+        - name: {{ .Values.mongo.envname1 }}
+          value: {{ .Values.mongo.envvalue1 }}
+        - name: {{ .Values.mongo.envname2 }}
+          value: {{ .Values.mongo.envvalue2 }}
+        - name: {{ .Values.mongo.envname3 }}
           valueFrom:
               secretKeyRef:
                 name: mongo-root-password
