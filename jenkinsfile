@@ -9,7 +9,7 @@ pipeline {
         stage('Preparation') {
             steps {
                 echo 'prepare github repo....'
-                git branch: 'master', url: 'https://github.com/swelams/badreads'
+                git branch: 'master', url: 'https://github.com/swelams/helm'
             }
         }
         stage('Build-client') {
@@ -58,10 +58,10 @@ pipeline {
         }
 
         stage("add Repo") {
-                    steps {
-                           sh "helm repo add buildachart ${repo}"
-                        }
-                   }
+            steps {
+                sh "helm repo add buildachart ${repo}"
+            }
+        }
 
         stage('Deploy to minikube') {
             steps {
@@ -74,6 +74,29 @@ pipeline {
 
             }
         }
+
+        stage('sonarqube scan'){
+            steps {
+                echo 'scanning your code ....'
+                def scannerHome = tool 'SonarScanner 4.0';
+                withSonarQubeEnv(installationName: 'sonar'){
+                    sh "${scannerHome}/bin/sonar-scanner"
+                }
+            }
+        }
+        
+        stage("Quality gate") {
+            steps {
+                script {
+                    def qualitygate = waitForQualityGate()
+                    sleep(10)
+                    if (qualitygate.status != "OK") {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
+            }
+        }
+    
 
     }
 }
