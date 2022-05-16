@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    paramters {
-        choice(name: 'BRANCH-NAME', choices: ['dev', 'test', 'prod'], description: '')
-    }
-
     stages {
         stage('Preparation') {
             steps {
@@ -68,8 +64,8 @@ pipeline {
                 echo 'Deploying to minikube'
                 withCredentials([file(credentialsId:'kube-config', variable:'KUBECONFIG')]){
                 script{
-                    sh "kubectl create namespace ${BRANCH-NAME}"
-                    sh "helm  upgrade --install my-cherry-chart buildachart/ --values buildachart/values.yaml --namespace ${BRANCH-NAME} --atomic --force"}
+                    sh "kubectl create namespace dev"
+                    sh "helm  upgrade --install my-cherry-chart buildachart/ --values buildachart/values.yaml --namespace dev --atomic --force"}
                 }
 
             }
