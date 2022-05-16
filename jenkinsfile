@@ -79,7 +79,7 @@ pipeline {
             steps {
                 echo 'scanning your code ....'
                 def scannerHome = tool 'SonarScanner 4.0';
-                withSonarQubeEnv(installationName: 'sonar'){
+                withSonarQubeEnv('sonar'){
                     sh "${scannerHome}/bin/sonar-scanner"
                 }
             }
