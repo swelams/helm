@@ -47,8 +47,8 @@ pipeline {
         stage('updating deployment files'){
             steps {
                 echo 'replacing old images with the new one'
-                sh "sed -i \"s|front-image:.*|image: mohamedswelam/client:${env.BUILD_NUMBER}|g\" buildchart/Values.yaml"
-                sh "sed -i \"s|back-image:.*|image: mohamedswelam/server:${env.BUILD_ID}|g\" buildchart/Values.yaml"
+                sh "sed -i \"s|front-image:.*|image: mohamedswelam/client:${env.BUILD_NUMBER}|g\" buildchart/values.yaml"
+                sh "sed -i \"s|back-image:.*|image: mohamedswelam/server:${env.BUILD_ID}|g\" buildchart/values.yaml"
 
             }
         }
