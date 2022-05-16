@@ -78,7 +78,6 @@ pipeline {
         stage('sonarqube scan'){
             steps {
                 echo 'scanning your code ....'
-                def scannerHome = tool 'SonarScanner 4.0';
                 withSonarQubeEnv('sonar'){
                     sh "${scannerHome}/bin/sonar-scanner"
                 }
