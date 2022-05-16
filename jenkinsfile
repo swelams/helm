@@ -52,25 +52,6 @@ pipeline {
 
             }
         }
-
-        stage("add Repo") {
-            steps {
-                sh "helm repo add buildachart ${repo}"
-            }
-        }
-
-        stage('Deploy to minikube') {
-            steps {
-                echo 'Deploying to minikube'
-                withCredentials([file(credentialsId:'kube-config', variable:'KUBECONFIG')]){
-                script{
-                    sh "kubectl create namespace dev"
-                    sh "helm  upgrade --install my-cherry-chart buildachart/ --values buildachart/values.yaml --namespace dev --atomic --force"}
-                }
-
-            }
-        }
-
         stage('sonarqube scan'){
             steps {
                 echo 'scanning your code ....'
