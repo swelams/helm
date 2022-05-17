@@ -1,10 +1,5 @@
 pipeline {
     agent any
-
-    paramters {
-        choice(name: 'BRANCH-NAME', choices: ['dev', 'test', 'prod'], description: '')
-    }
-
     stages {
         stage('Preparation') {
             steps {
