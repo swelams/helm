@@ -44,6 +44,16 @@ pipeline {
             }
         }
 
+        stage('Deploy to minikube') {
+            steps {
+                echo 'Deploying to minikube'
+                sh "sed -i 's/app:latest/mohamedswelam/swelam:${env.BUILD_ID}/g' deployment.yaml"
+                script{
+                    sh 'kubectl apply -f deployment.yaml'
+                }
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps{
                     withSonarQubeEnv('sonar') {
