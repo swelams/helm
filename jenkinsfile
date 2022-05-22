@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    paramters {
+        choice(name: 'BRANCHNAME', choices: ['dev', 'test', 'prod'], description: '')
+    }
     stages {
         stage('Preparation') {
             steps {
@@ -7,64 +10,64 @@ pipeline {
                 git branch: 'master', url: 'https://github.com/swelams/helm'
             }
         }
+
+        stage('nexus-login'){
+            steps {
+                echo 'login to nexus '
+                withCredentials([usernamePassword(credentialsId: 'nexus-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
+                    sh "echo $PASSWORD | docker login -u $USERNAME ec2-100-24-24-1.compute-1.amazonaws.com:8085 --password-stdin"
+                }
+            }
+        }
+
+
         stage('Build-client') {
             steps {
                 echo 'building client image....'
-                sh "docker build badreads-frontend/. -t mohamedswelam/client:${env.BUILD_NUMBER}"
+                sh "docker build badreads-frontend/. -t ec2-100-24-24-1.compute-1.amazonaws.com:8085/client:${env.BUILD_NUMBER}"
             }
         }
 
         stage('Build-server') {
             steps {
                 echo 'building server image...'
-                sh "docker build badreads-backend/. -t mohamedswelam/server:${env.BUILD_ID}"
+                sh "docker build badreads-backend/. -t ec2-100-24-24-1.compute-1.amazonaws.com:8085/server:99"
             }
         }
 
 
         stage('artifact-client') {
             steps {
-                echo ' pushing client image into docker repo...'
-                withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh "echo $PASSWORD | docker login -u $USERNAME --password-stdin"
-                    sh "docker push mohamedswelam/client:${env.BUILD_NUMBER}"
-                    
-                }
+                echo ' pushing client image into nexus repo...'
+                sh "docker push ec2-100-24-24-1.compute-1.amazonaws.com:8085/client:${env.BUILD_NUMBER}"
             }
         }
 
         stage('artifact-server') {
             steps {
-                echo 'pushing server image to docker repo...'
-                withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh "echo $PASSWORD | docker login -u $USERNAME --password-stdin"
-                    sh "docker push mohamedswelam/server:${env.BUILD_ID}"
-                    
-                }
+                echo 'pushing server image to nexus repo...'
+                sh "docker push ec2-100-24-24-1.compute-1.amazonaws.com:8085/server:99"    
+            }
+        }
+
+
+        stage('updating deployment files'){
+            steps {
+                echo 'replacing old images with the new one'
+                sh "sed -i \"s|image:.*|image: ec2-100-24-24-1.compute-1.amazonaws.com:8085/client:${env.BUILD_NUMBER}|g\" k8s/frontend-deployment.yaml"
+                sh "sed -i \"s|image:.*|image: ec2-100-24-24-1.compute-1.amazonaws.com:8085/server:99|g\" k8s/backend-deployment.yaml"
+
             }
         }
 
         stage('Deploy to minikube') {
             steps {
                 echo 'Deploying to minikube'
-                sh "sed -i 's/app:latest/mohamedswelam/swelam:${env.BUILD_ID}/g' deployment.yaml"
+                withCredentials([file(credentialsId:'kube-config', variable:'KUBECONFIG')]){
                 script{
-                    sh 'kubectl apply -f deployment.yaml'
+                    sh "kubectl apply -f k8s --namespace $BRANCHNAME"}
                 }
             }
-        }
-
-        stage('SonarQube Analysis') {
-            steps{
-                    withSonarQubeEnv('sonar') {
-                        sh """/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQube/bin/sonar-scanner \
-                        sonar-scanner \
-                        -Dsonar.projectKey=back-end-project \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=http://192.168.59.102:30335 \
-                        -Dsonar.login=last"""
-                    }
-            }                    
         }
     }
 }   
