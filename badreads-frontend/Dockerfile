@@ -1,8 +1,10 @@
 FROM node:14.14.0 as builder
 WORKDIR /app
 COPY ./package.json .
-RUN npm install
+COPY ./.npmrc ./
+RUN npm install --loglevel verbose
 COPY . .
+RUN npm run build
 EXPOSE 3000
 RUN npm run build
 FROM nginx
