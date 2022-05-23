@@ -65,7 +65,7 @@ pipeline {
                 echo 'Deploying to minikube'
                 withCredentials([file(credentialsId:'kube-config', variable:'KUBECONFIG')]){
                 script{
-                    sh "kubectl apply -f k8s --namespace $BRANCHNAME"}
+                    sh "kubectl apply -f k8s --namespace ${params.BRANCHNAME}"}
                 }
             }
         }
